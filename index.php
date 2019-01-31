@@ -42,6 +42,7 @@ $user_name = 'Ольга'; // укажите здесь ваше имя
           </ul>
           <?php  endif; ?>
         </nav>
+
     </div>
 </header>
 
