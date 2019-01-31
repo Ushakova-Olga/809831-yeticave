@@ -1,7 +1,7 @@
 # Личный проект «YetiCave»
 
 * Студент: [Ольга Ушакова](https://up.htmlacademy.ru/php/8/user/809831).
-* Наставник: `Неизвестно`.
+* Наставник: [Олег Головахин](https://up.htmlacademy.ru/php/8/user/849005).
 
 ---
 
