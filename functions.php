@@ -22,4 +22,15 @@ function convert_text($str) {
 
 	return $text;
 }
+
+function seconds_tomorrow() {
+    /*date_default_timezone_set("Asia/Krasnoyarsk");*/
+    $ts_midnight = strtotime('tomorrow midnight');
+    $secs_to_midnight = $ts_midnight - strtotime('now');
+    $hours = floor($secs_to_midnight / 3600);
+    $minutes = floor(($secs_to_midnight % 3600)/60);
+    $result = $hours . ':' . $minutes;
+
+    return $result;
+}
 ?>
