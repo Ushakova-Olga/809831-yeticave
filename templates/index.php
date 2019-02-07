@@ -30,7 +30,7 @@
                             <span class="lot__cost"><?=format_rub(convert_text($item['price']));?></span>
                         </div>
                         <div class="lot__timer timer">
-                            12:23
+                            <?=seconds_tomorrow();?>
                         </div>
                     </div>
                 </div>
