@@ -63,10 +63,14 @@ if(!$con) {
     $error="Ошибка подключения: " . mysqli_connect_error();
     $page_content = include_template('error.php', ['error' => $error]);
 } else {
-    $sql= "SELECT l.name name, c.name category, l.start_price price, l.img_url url   FROM lots l
+    /* Вот если такой запрос можно использовать, то тогда и поле с текущей ценой не надо хранить в лотах.
+    Пришлось преобразовывать NULL в 0, потому что иначе, если ставок по лоту нет, то цена выводится = 0 */
+    $sql= "SELECT l.name name, c.name category, GREATEST(IFNULL(MAX(r.summ),0),l.start_price) price, l.img_url url   FROM lots l
     JOIN users u ON u.id=l.user_author_id
     JOIN categories c ON c.id=l.category_id
+    LEFT JOIN rates r ON r.lot_id=l.id
     WHERE l.user_victor_id IS NULL
+    GROUP BY l.id
     ORDER BY l.date_add DESC
     LIMIT 9";
     $result = mysqli_query($con, $sql);
