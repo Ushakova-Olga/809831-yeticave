@@ -9,14 +9,14 @@
       </ul>
     </nav>
     <section class="lot-item container">
-      <h2><?=$lot[0]['name']?></h2>
+      <h2><?=$lot['name']?></h2>
       <div class="lot-item__content">
         <div class="lot-item__left">
           <div class="lot-item__image">
-            <img src="<?=convert_text($lot[0]['url']); ?>" width="730" height="548" alt="<?=$lot[0]['name']?>">
+            <img src="<?=convert_text($lot['url']); ?>" width="730" height="548" alt="<?=$lot['name']?>">
           </div>
-          <p class="lot-item__category">Категория: <span><?=$lot[0]['category'] ?></span></p>
-          <p class="lot-item__description"><?=$lot[0]['description'] ?></p>
+          <p class="lot-item__category">Категория: <span><?=$lot['category'] ?></span></p>
+          <p class="lot-item__description"><?=$lot['description'] ?></p>
         </div>
         <div class="lot-item__right">
           <div class="lot-item__state">
@@ -27,16 +27,16 @@
               <div class="lot-item__rate">
                 <span class="lot-item__amount">Текущая цена</span>
                 <!--span class="lot-item__cost">10 999</span-->
-                <span class="lot-item__cost"><?=number_format($lot[0]['price'],0,'',' ') ?></span>
+                <span class="lot-item__cost"><?=number_format($lot['price'],0,'',' ') ?></span>
               </div>
               <div class="lot-item__min-cost">
-                Мин. ставка <span><?=number_format($lot[0]['price']+$lot[0]['step'],0,'',' ') ?> р</span>
+                Мин. ставка <span><?=number_format($lot['price']+$lot['step'],0,'',' ') ?> р</span>
               </div>
             </div>
             <form class="lot-item__form" action="https://echo.htmlacademy.ru" method="post">
               <p class="lot-item__form-item form__item form__item--invalid">
                 <label for="cost">Ваша ставка</label>
-                <input id="cost" type="text" name="cost" placeholder="<?=number_format($lot[0]['price']+$lot[0]['step'],0,'',' ') ?>">
+                <input id="cost" type="text" name="cost" placeholder="<?=number_format($lot['price']+$lot['step'],0,'',' ') ?>">
                 <span class="form__error">Введите наименование лота</span>
               </p>
               <button type="submit" class="button">Сделать ставку</button>

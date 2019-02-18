@@ -10,15 +10,15 @@ $con = mysqli_connect("localhost", "root", "", "yeticave");
 mysqli_set_charset($con, "utf8");
 $var_404 = 0;
 
-//Преобразуем к числу, чтобы избежать SQL- инъекций
-$id= intval($_GET['id']);
-
-if (!ISSET($id)){
+if (!ISSET($_GET['id'])){
     // В запросе отсутствует наш id
     $var_404 = 1;
 }
 
 if ($var_404 == 0) {
+    //Преобразуем к числу, чтобы избежать SQL- инъекций
+    $id= intval($_GET['id']);
+
     if(!$con) {
         $error="Ошибка подключения: " . mysqli_connect_error();
         $page_content = include_template('error.php', ['error' => $error]);
@@ -49,7 +49,7 @@ if ($var_404 == 0) {
             $error= mysqli_error($con);
             $page_content = include_template('error.php', ['error' => $error]);
         } else {
-            $lot_data= mysqli_fetch_all($result, MYSQLI_ASSOC);
+            $lot_data= mysqli_fetch_array($result, MYSQLI_ASSOC);
             if (count($lot_data) == 0) $var_404 = 1;
         }
     }
