@@ -37,16 +37,16 @@ if(!$con) {
             }
         }
 
-      if (!is_numeric($_POST['category'])) {
+      if ((!is_numeric($_POST['category']))||($_POST['category'] <= 0)) {
         $errors['category'] = 'Выберите категорию';
       }
 
-      if (!is_numeric($_POST['lot-rate'])) {
-        $errors['lot-rate'] = 'Введите число';
+      if ((!is_numeric($_POST['lot-rate']))||($_POST['lot-rate'] <= 0)) {
+        $errors['lot-rate'] = 'Введите число больше нуля';
       }
 
-      if (!is_numeric($_POST['lot-step'])) {
-        $errors['lot-step'] = 'Введите число';
+      if ((!is_numeric($_POST['lot-step']))||($_POST['lot-step'] <= 0)) {
+        $errors['lot-step'] = 'Введите число больше нуля';
       }
 
       if (!delta_day($_POST['lot-date'])) {
@@ -64,6 +64,8 @@ if(!$con) {
                 $errors['file'] = 'Загрузите картинку в формате GPEG, либо PNG';
             }
             else {
+                if ($file_type == "image/jpeg") $path = uniqid() . ".jpg";
+                if ($file_type == "image/png") $path = uniqid() . ".png";
                 move_uploaded_file($tmp_name, 'img/' . $path);
                 $lot['path'] = $path;
             }
