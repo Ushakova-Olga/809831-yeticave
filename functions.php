@@ -33,6 +33,15 @@ function seconds_tomorrow() {
     return $result;
 }
 
+function delta_day($str) {
+    $ts_lot = strtotime($str);
+    $secs_passed = $ts_lot - strtotime('now');
+
+    $days = floor($secs_passed / 86400);
+    if ($days > 0) return true;
+    return false;
+}
+
 function rate_time($str) {
     $ts_lot = strtotime($str);
     $secs_passed = strtotime('now') - $ts_lot;
@@ -64,4 +73,40 @@ function rate_time($str) {
 
     return $result;
 }
+
+function db_get_prepare_stmt($link, $sql, $data = []) {
+    $stmt = mysqli_prepare($link, $sql);
+
+    if ($data) {
+        $types = '';
+        $stmt_data = [];
+
+        foreach ($data as $value) {
+            $type = null;
+
+            if (is_int($value)) {
+                $type = 'i';
+            }
+            else if (is_string($value)) {
+                $type = 's';
+            }
+            else if (is_double($value)) {
+                $type = 'd';
+            }
+
+            if ($type) {
+                $types .= $type;
+                $stmt_data[] = $value;
+            }
+        }
+
+        $values = array_merge([$stmt, $types], $stmt_data);
+
+        $func = 'mysqli_stmt_bind_param';
+        $func(...$values);
+    }
+
+    return $stmt;
+}
+
 ?>

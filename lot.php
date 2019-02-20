@@ -4,6 +4,7 @@ $is_auth = rand(0, 1);
 
 $user_name = 'Ольга'; // укажите здесь ваше имя
 $categories = [];
+$name_page='';
 
 $error = '';
 $con = mysqli_connect("localhost", "root", "", "yeticave");
@@ -85,17 +86,20 @@ if ($var_404 == 1) {
 
 /* Если нет никаких ошибок, то показываем обычную страницу */
 if (($error == '')&&($var_404 == 0)) {
+    $name_page=$lot_data['name'];
     $page_content = include_template('lot.php', [
         'categories' => $categories,
         'lot' => $lot_data,
         'rates' => $rates_data
     ]);
+} else {
+    $name_page="Yeticave - Ошибка";
 }
 
 $layout_content = include_template('layout.php', [
 	'content' => $page_content,
 	'categories' => $categories,
-	'name_page' => 'DC Ply Mens 2016/2017 Snowboard',
+	'name_page' => $name_page,
     'is_auth' => $is_auth,
     'user_name' => $user_name
 ]);
