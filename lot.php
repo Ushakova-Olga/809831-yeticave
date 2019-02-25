@@ -5,12 +5,14 @@ require_once('functions.php');
 
 $is_auth = 0;
 $user_name = '';
-
+$user_id='';
 session_start();
 if (isset($_SESSION['user'])){
     $u = $_SESSION['user'];
     $is_auth = 1;
     $user_name = $u['name'];
+    $user_id = $u['id'];
+
 }
 
 $categories = [];
@@ -94,18 +96,14 @@ if ($var_404 == 0) {
 if ($var_404 == 1) {
     http_response_code(404);
     $page_content = include_template('404.php', [
-        'categories' => $categories
+        'categories' => $categories, 'error' => '404'
     ]);
 }
 
 /* Если нет никаких ошибок, то показываем обычную страницу */
 if (($error == '')&&($var_404 == 0)) {
-    ////
-    // Проверяем что пользователь залогинен. Надо доделать, не работает условие
-    //if ($is_auth)
-    {
-      // работа с данными формы по добавлению ставок, если она была отправлена
-      if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+      // работа с данными формы по добавлению ставок, если она была отправлена и если пользователь залогинен
+      if (($_SERVER['REQUEST_METHOD'] == 'POST')&&($is_auth)){
         $rate = $_POST;
         $required = ['cost'];
         $dict = ['cost' => 'Сумма ставки'];
@@ -134,8 +132,8 @@ if (($error == '')&&($var_404 == 0)) {
           ]);
         }
         else {//ошибок заполнения формы нет
-          $sql = 'INSERT INTO rates (date_add, summ, user_id, lot_id) VALUES (NOW(), ?, 1, ?)';
-          $stmt = db_get_prepare_stmt($con, $sql, [$rate['cost'], $id]);
+          $sql = 'INSERT INTO rates (date_add, summ, user_id, lot_id) VALUES (NOW(), ?, ?, ?)';
+          $stmt = db_get_prepare_stmt($con, $sql, [$rate['cost'], $user_id, $id]);
           $res = mysqli_stmt_execute($stmt);
 
           // Добавили ставку и тепрерь нужно обновить страницу
@@ -154,11 +152,11 @@ if (($error == '')&&($var_404 == 0)) {
             'rates' => $rates_data,
             'cost' => [],
             'errors' => [],
-            'dict' => []
+            'dict' => [],
+            'is_auth' => $is_auth
         ]);
     }
-    }
-    ////
+
 
     $name_page=$lot_data['name'];
 

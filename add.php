@@ -35,6 +35,12 @@ if(!$con) {
         $categories= mysqli_fetch_all($result, MYSQLI_ASSOC);
     }
 
+    if ($is_auth ==0) {
+        http_response_code(403);
+        $page_content = include_template('404.php', [
+            'categories' => $categories, 'error' => '403'
+        ]);
+    } else {
     // работа с данными формы если она была отправлена
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $lot = $_POST;
@@ -108,6 +114,7 @@ if(!$con) {
     else {// форма не была отправлена, просто отображаем страницу
         $page_content = include_template('add.php', ['categories' => $categories]);
     }
+   }
 }
 
 $layout_content = include_template('layout.php', [

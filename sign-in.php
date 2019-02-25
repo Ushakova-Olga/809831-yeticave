@@ -6,6 +6,7 @@ require_once('functions.php');
 
 $is_auth = 0;
 $user_name = '';
+$path = '';
 
 session_start();
 if (isset($_SESSION['user'])){
@@ -63,12 +64,12 @@ if(!$con) {
                 move_uploaded_file($tmp_name, 'img/' . $path);
                 $user['path'] = $path;
             }
-          } else {
-            $errors['file'] = 'Вы не загрузили файл';
-          }
-      } else {
-        $errors['file'] = 'Вы не загрузили файл';
-      }
+        } //else// {
+            //$errors['file'] = 'Вы не загрузили файл';
+         // }
+      } //else {
+        //$errors['file'] = 'Вы не загрузили файл';
+      //}
 
       $email = mysqli_real_escape_string($con, $user['email']);
       $sql = "SELECT id FROM users WHERE email = '$email'";
@@ -78,7 +79,7 @@ if(!$con) {
           $errors['email'] = 'Пользователь с этим email уже зарегистрирован';
       }
 
-      if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      if (!filter_var($email, FILTER_VALIDATE_EMAIL) ) {
           $errors['email'] = 'Введен некорректный e-mail';
       }
 
@@ -89,7 +90,10 @@ if(!$con) {
           $password = password_hash($user['password'], PASSWORD_DEFAULT);
           //Создание нового пользователя
           $sql = 'INSERT INTO users (date_add, email, name, password, img_url, contacts) VALUES (NOW(), ?, ?, ?, ?, ?)';
-          $stmt = db_get_prepare_stmt($con, $sql, [$user['email'], $user['name'], $password, 'img/' . $user['path'], $user['message']]);
+          if ($path!='') {
+            $path = 'img/' . $path;
+          }
+          $stmt = db_get_prepare_stmt($con, $sql, [$user['email'], $user['name'], $password, $path, $user['message']]);
           $res = mysqli_stmt_execute($stmt);
 
           // переход на страницу входа
