@@ -3,7 +3,7 @@
       <ul class="nav__list container">
         <?php foreach ($categories as $item): ?>
           <li class="nav__item">
-            <a href="pages/all-lots.html"><?=$item['name'];?></a>
+            <a href="all-lots.php?category=<?=convert_text($item['id'])?>"><?=$item['name'];?></a>
           </li>
         <?php endforeach; ?>
       </ul>
@@ -19,7 +19,8 @@
           <p class="lot-item__description"><?=$lot['description'] ?></p>
         </div>
         <div class="lot-item__right">
-          <div class="lot-item__state">
+          <?php $classname = $is_auth ? "" : "visually-hidden";?>
+          <div class="lot-item__state <?=$classname;?>">
             <div class="lot-item__timer timer">
                 <?=seconds_tomorrow();?>
             </div>
@@ -33,11 +34,14 @@
                 Мин. ставка <span><?=number_format($lot['price']+$lot['step'],0,'',' ') ?> р</span>
               </div>
             </div>
-            <form class="lot-item__form" action="https://echo.htmlacademy.ru" method="post">
-              <p class="lot-item__form-item form__item form__item--invalid">
+            <form class="lot-item__form" action="lot.php?id=<?=$lot['id'];?>" method="post">
+              <?php $classname = isset($errors['cost']) ? "form__item--invalid" : "";
+              $value = isset($lot['cost']) ? $lot['cost'] : "";
+              $error = isset($errors['cost']) ? $errors['cost'] : "";?>
+              <p class="lot-item__form-item form__item <?=$classname;?>">
                 <label for="cost">Ваша ставка</label>
-                <input id="cost" type="text" name="cost" placeholder="<?=number_format($lot['price']+$lot['step'],0,'',' ') ?>">
-                <span class="form__error">Введите наименование лота</span>
+                <input id="cost" type="text" name="cost" value="<?=$value;?>" placeholder="<?=number_format($lot['price']+$lot['step'],0,'',' ') ?>">
+                <span class="form__error"><?=$error ?></span>
               </p>
               <button type="submit" class="button">Сделать ставку</button>
             </form>

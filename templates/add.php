@@ -3,7 +3,7 @@
     <ul class="nav__list container">
       <?php foreach ($categories as $item): ?>
         <li class="nav__item">
-          <a href="pages/all-lots.html"><?=$item['name'];?></a>
+          <a href="all-lots.php?category=<?=convert_text($item['id'])?>"><?=$item['name'];?></a>
         </li>
       <?php endforeach; ?>
     </ul>
@@ -16,7 +16,7 @@
       <?php $classname = isset($errors['lot-name']) ? "form__item--invalid" : "";
       $value = isset($lot['lot-name']) ? $lot['lot-name'] : "";
       $error = isset($errors['lot-name']) ? $errors['lot-name'] : "";?>
-      <div class="form__item <?=$classname;?>"> <!-- form__item--invalid -->
+      <div class="form__item <?=$classname;?>">
         <label for="lot-name">Наименование</label>
         <input id="lot-name" type="text" name="lot-name" placeholder="Введите наименование лота" value="<?=$value;?>">
         <span class="form__error"><?=$error ?></span>
@@ -88,10 +88,10 @@
         <span class="form__error"><?=$error ?></span>
       </div>
     </div>
-    <span class="form__error form__error--bottom">Пожалуйста, исправьте ошибки в форме.
+    <span class="form__error form__error--bottom">
       <?php if (isset($errors)): ?>
         <div class="form__errors">
-          <p>Пожалуйста, исправьте следующие ошибки:</p>
+          <p>Пожалуйста, исправьте следующие ошибки в форме:</p>
           <ul>
             <?php foreach($errors as $err => $val): ?>
             <li><strong><?=$dict[$err];?>:</strong> <?=$val;?></li>
@@ -100,7 +100,6 @@
         </div>
       <?php endif; ?>
     </span>
-
     <button type="submit" class="button" name="send">Добавить лот</button>
   </form>
 </main>

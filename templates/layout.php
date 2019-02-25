@@ -25,14 +25,15 @@
           <?php  if ($is_auth === 1 ):  ?>
           <div class="user-menu__logged">
             <p><?=$user_name; ?></p>
+            <a href="logout.php">Выйти</a>
           </div>
           <?php  else: ?>
           <ul class="user-menu__list">
             <li class="user-menu__item">
-              <a href="#">Регистрация</a>
+              <a href="sign-in.php">Регистрация</a>
             </li>
             <li class="user-menu__item">
-              <a href="#">Вход</a>
+              <a href="login.php">Вход</a>
             </li>
           </ul>
           <?php  endif; ?>
@@ -47,10 +48,9 @@
     <nav class="nav">
         <ul class="nav__list container">
             <?php foreach ($categories as $item): ?>
-                <!--заполните этот список из массива категорий-->
-                <li class="nav__item">
-                    <a href="pages/all-lots.html"><?=$item['name'];?></a>
-                </li>
+              <li class="nav__item">
+                <a href="all-lots.php?category=<?=convert_text($item['id'])?>"><?=$item['name'];?></a>
+              </li>
             <?php endforeach; ?>
         </ul>
     </nav>

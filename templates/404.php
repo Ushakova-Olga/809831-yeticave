@@ -3,13 +3,13 @@
         <ul class="nav__list container">
           <?php foreach ($categories as $item): ?>
             <li class="nav__item">
-              <a href="pages/all-lots.html"><?=$item['name'];?></a>
+              <a href="all-lots.php?category=<?=convert_text($item['id'])?>"><?=$item['name'];?></a>
             </li>
           <?php endforeach; ?>
         </ul>
     </nav>
     <section class="lot-item container">
-        <h2>404 Страница не найдена</h2>
+        <h2><?=$error ?> Страница не найдена</h2>
         <p>Данной страницы не существует на сайте.</p>
     </section>
 </main>
