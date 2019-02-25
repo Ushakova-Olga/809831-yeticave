@@ -23,6 +23,16 @@ function convert_text($str) {
 	return $text;
 }
 
+function format_rub($arg)
+{
+    $result = ceil($arg);
+    if ($result > 999) {
+        $result = number_format($result,0,'',' ');
+    }
+    $result = $result . " ₽";
+    return $result;
+}
+
 function seconds_tomorrow() {
     $ts_midnight = strtotime('tomorrow midnight');
     $secs_to_midnight = $ts_midnight - strtotime('now');

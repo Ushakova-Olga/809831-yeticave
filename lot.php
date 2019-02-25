@@ -1,10 +1,24 @@
 <?php
 require_once('functions.php');
-$is_auth = rand(0, 1);
+//$is_auth = rand(0, 1);
+//$user_name = 'Ольга'; // укажите здесь ваше имя
 
-$user_name = 'Ольга'; // укажите здесь ваше имя
+$is_auth = 0;
+$user_name = '';
+
+session_start();
+if (isset($_SESSION['user'])){
+    $u = $_SESSION['user'];
+    $is_auth = 1;
+    $user_name = $u['name'];
+}
+
 $categories = [];
 $name_page='';
+/////
+$rate['cost']= '';
+$errors = '';
+$dict = '';
 
 $error = '';
 $con = mysqli_connect("localhost", "root", "", "yeticave");
@@ -24,7 +38,7 @@ if ($var_404 == 0) {
         $error="Ошибка подключения: " . mysqli_connect_error();
         $page_content = include_template('error.php', ['error' => $error]);
     } else {
-        $sql= "SELECT c.name FROM categories c";
+        $sql= "SELECT c.id, c.name FROM categories c";
         $result = mysqli_query($con, $sql);
         if(!$result) {
             $error= mysqli_error($con);
@@ -86,12 +100,68 @@ if ($var_404 == 1) {
 
 /* Если нет никаких ошибок, то показываем обычную страницу */
 if (($error == '')&&($var_404 == 0)) {
+    ////
+    // Проверяем что пользователь залогинен. Надо доделать, не работает условие
+    //if ($is_auth)
+    {
+      // работа с данными формы по добавлению ставок, если она была отправлена
+      if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        $rate = $_POST;
+        $required = ['cost'];
+        $dict = ['cost' => 'Сумма ставки'];
+        $errors = [];
+        foreach ($required as $key) {
+            if (empty($_POST[$key])) {
+                $errors[$key] = 'Это поле надо заполнить';
+            }
+        }
+
+      if (!is_numeric($_POST['cost'])) {
+        $errors['cost'] = 'Сумма ставки должна быть числом';
+      } else if ($_POST['cost'] <= 0) {
+        $errors['cost'] = 'Сумма ставки должна быть больше нуля';
+      } else if ($_POST['cost'] < ($lot_data['price']+$lot_data['step'])) {
+        $errors['cost'] = 'Сумма ставки должна быть больше текущей + шаг торгов';
+      }
+        if (count($errors)) {// если есть ошибки заполнения формы
+          $page_content = include_template('lot.php', [
+              'categories' => $categories,
+              'lot' => $lot_data,
+              'rates' => $rates_data,
+              'cost' => $rate['cost'],
+              'errors' => $errors,
+              'dict' => $dict
+          ]);
+        }
+        else {//ошибок заполнения формы нет
+          $sql = 'INSERT INTO rates (date_add, summ, user_id, lot_id) VALUES (NOW(), ?, 1, ?)';
+          $stmt = db_get_prepare_stmt($con, $sql, [$rate['cost'], $id]);
+          $res = mysqli_stmt_execute($stmt);
+
+          // Добавили ставку и тепрерь нужно обновить страницу
+          if ($res) {
+            header("Location: lot.php?id=" . $id . "update=1");
+          }
+          else {
+            $page_content = include_template('error.php', ['error' => mysqli_error($con)]);
+          }
+        }
+    } else {
+        //форма не была отправлена, ошибки =0
+        $page_content = include_template('lot.php', [
+            'categories' => $categories,
+            'lot' => $lot_data,
+            'rates' => $rates_data,
+            'cost' => [],
+            'errors' => [],
+            'dict' => []
+        ]);
+    }
+    }
+    ////
+
     $name_page=$lot_data['name'];
-    $page_content = include_template('lot.php', [
-        'categories' => $categories,
-        'lot' => $lot_data,
-        'rates' => $rates_data
-    ]);
+
 } else {
     $name_page="Yeticave - Ошибка";
 }

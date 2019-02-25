@@ -15,7 +15,6 @@ if (isset($_SESSION['user'])){
 }
 
 $categories = [];
-$lots_list = [];
 
 $error = '';
 $con = mysqli_connect("localhost", "root", "", "yeticave");
@@ -37,10 +36,10 @@ if(!$con) {
 
     // работа с данными формы если она была отправлена
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        $lot = $_POST;
-        $required = ['lot-name', 'category', 'message', 'lot-rate', 'lot-step', 'lot-date'];
-        $dict = ['lot-name' => 'Наименование лота', 'category' => 'Категория', 'message' => 'Описание',
-            'lot-rate'=>'Начальная цена' , 'lot-step'=>'Шаг ставки' , 'lot-date'=>'Дата окончания торгов', 'file'=>'Изображение лота'];
+        $user = $_POST;
+        $required = ['email', 'password', 'name', 'message'];
+        $dict = ['email' => 'E-mail', 'password' => 'Пароль', 'name' => 'Имя',
+            'message'=>'Контактные данные', 'file'=>'Аватар'];
         $errors = [];
         foreach ($required as $key) {
             if (empty($_POST[$key])) {
@@ -48,24 +47,8 @@ if(!$con) {
             }
         }
 
-      if ((!is_numeric($_POST['category']))||($_POST['category'] <= 0)) {
-        $errors['category'] = 'Выберите категорию';
-      }
-
-      if ((!is_numeric($_POST['lot-rate']))||($_POST['lot-rate'] <= 0)) {
-        $errors['lot-rate'] = 'Введите число больше нуля';
-      }
-
-      if ((!is_numeric($_POST['lot-step']))||($_POST['lot-step'] <= 0)) {
-        $errors['lot-step'] = 'Введите число больше нуля';
-      }
-
-      if (!delta_day($_POST['lot-date'])) {
-        $errors['lot-date'] = 'Дата завершения должна быть хотя бы на день больше текущей';
-      }
-
-      if (isset($_FILES['photo2']['name'])) {
-        if (!empty($_FILES['photo2']['name'])) {
+        if (isset($_FILES['photo2']['name'])) {
+          if (!empty($_FILES['photo2']['name'])) {
             $tmp_name = $_FILES['photo2']['tmp_name'];
             $path = $_FILES['photo2']['name'];
 
@@ -78,42 +61,56 @@ if(!$con) {
                 if ($file_type == "image/jpeg") $path = uniqid() . ".jpg";
                 if ($file_type == "image/png") $path = uniqid() . ".png";
                 move_uploaded_file($tmp_name, 'img/' . $path);
-                $lot['path'] = $path;
+                $user['path'] = $path;
             }
-        } else {
+          } else {
             $errors['file'] = 'Вы не загрузили файл';
-        }
+          }
       } else {
         $errors['file'] = 'Вы не загрузили файл';
       }
 
-      if (count($errors)) {// если есть ошибки заполнения формы
-        $page_content = include_template('add.php', ['lot' => $lot, 'categories' => $categories, 'errors' => $errors, 'dict' => $dict]);
-      }
-      else {//ошибок заполнения формы нет
-        $sql = 'INSERT INTO lots (date_add, name, description, img_url, start_price, date_end, step, user_author_id, category_id) VALUES (NOW(), ?, ?, ?, ?, ?, ?, 1, ?)';
-        $stmt = db_get_prepare_stmt($con, $sql, [$lot['lot-name'], $lot['message'], 'img/' . $lot['path'], $lot['lot-rate'], $lot['lot-date'], $lot['lot-step'], $lot['category']]);
-        $res = mysqli_stmt_execute($stmt);
+      $email = mysqli_real_escape_string($con, $user['email']);
+      $sql = "SELECT id FROM users WHERE email = '$email'";
+      $res = mysqli_query($con, $sql);
 
-        // получили id созданого лота и перешли на его страницу
-        if ($res) {
-            $lot_id = mysqli_insert_id($con);
-            header("Location: lot.php?id=" . $lot_id);
-        }
-        else {
+      if (mysqli_num_rows($res) > 0) {
+          $errors['email'] = 'Пользователь с этим email уже зарегистрирован';
+      }
+
+      if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+          $errors['email'] = 'Введен некорректный e-mail';
+      }
+
+      if (count($errors)) {// если есть ошибки заполнения формы
+        $page_content = include_template('sign-in.php', ['categories' => $categories, 'user' => $user, 'errors' => $errors, 'dict' => $dict]);
+      }
+      else {//ошибок заполнения формы нет, добавляем пользователя
+          $password = password_hash($user['password'], PASSWORD_DEFAULT);
+          //Создание нового пользователя
+          $sql = 'INSERT INTO users (date_add, email, name, password, img_url, contacts) VALUES (NOW(), ?, ?, ?, ?, ?)';
+          $stmt = db_get_prepare_stmt($con, $sql, [$user['email'], $user['name'], $password, 'img/' . $user['path'], $user['message']]);
+          $res = mysqli_stmt_execute($stmt);
+
+          // переход на страницу входа
+          if ($res) {
+            //$user_id = mysqli_insert_id($con);
+            header("Location: login.php");
+            exit();
+          } else {
             $page_content = include_template('error.php', ['error' => mysqli_error($con)]);
-        }
+          }
       }
     }
     else {// форма не была отправлена, просто отображаем страницу
-        $page_content = include_template('add.php', ['categories' => $categories]);
+        $page_content = include_template('sign-in.php', ['categories' => $categories]);
     }
 }
 
 $layout_content = include_template('layout.php', [
 	'content' => $page_content,
 	'categories' => $categories,
-	'name_page' => 'Добавление лота',
+	'name_page' => 'Добавление пользователя',
     'is_auth' => $is_auth,
     'user_name' => $user_name
 ]);
