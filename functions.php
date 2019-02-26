@@ -43,6 +43,32 @@ function seconds_tomorrow() {
     return $result;
 }
 
+function seconds_free($str) {
+    $ts_start = strtotime('now');
+    $ts_end = strtotime($str);
+
+    $secs_free = $ts_end - $ts_start;
+    if ($secs_free > 0) {
+    $hours = floor($secs_free / 3600);
+    $minutes = floor(($secs_free % 3600)/60);
+    $seconds = floor(($secs_free % 3600)%60);
+    $result = $hours . ':' . $minutes . ':' . $seconds;
+
+    return $result;
+  } else {
+    return false;
+  }
+}
+
+function actually($str) {
+    $ts_start = strtotime('now');
+    $ts_end = strtotime($str);
+    $secs_free = $ts_end - $ts_start;
+
+    $result = ($secs_free > 0) ? true : false;
+    return $result;
+}
+
 function delta_day($str) {
     $ts_lot = strtotime($str);
     $secs_passed = $ts_lot - strtotime('now');

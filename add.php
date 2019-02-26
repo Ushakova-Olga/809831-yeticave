@@ -1,17 +1,17 @@
 <?php
 // Добавление нового лота
 require_once('functions.php');
-//$is_auth = rand(0, 1);
-//$user_name = 'Ольга'; // укажите здесь ваше имя
 
 $is_auth = 0;
 $user_name = '';
+$user_id = '';
 
 session_start();
 if (isset($_SESSION['user'])){
     $u = $_SESSION['user'];
     $is_auth = 1;
     $user_name = $u['name'];
+    $user_id = $u['id'];
 }
 
 $categories = [];
@@ -54,73 +54,76 @@ if(!$con) {
             }
         }
 
-      if ((!is_numeric($_POST['category']))||($_POST['category'] <= 0)) {
-        $errors['category'] = 'Выберите категорию';
-      }
+        if ((!is_numeric($_POST['category']))||($_POST['category'] <= 0)) {
+            $errors['category'] = 'Выберите категорию';
+        }
 
-      if ((!is_numeric($_POST['lot-rate']))||($_POST['lot-rate'] <= 0)) {
-        $errors['lot-rate'] = 'Введите число больше нуля';
-      }
+        if ((!is_numeric($_POST['lot-rate']))||($_POST['lot-rate'] <= 0)) {
+            $errors['lot-rate'] = 'Введите число больше нуля';
+        }
 
-      if ((!is_numeric($_POST['lot-step']))||($_POST['lot-step'] <= 0)) {
-        $errors['lot-step'] = 'Введите число больше нуля';
-      }
+        if ((!is_numeric($_POST['lot-step']))||($_POST['lot-step'] <= 0)) {
+            $errors['lot-step'] = 'Введите число больше нуля';
+        }
 
-      if (!delta_day($_POST['lot-date'])) {
-        $errors['lot-date'] = 'Дата завершения должна быть хотя бы на день больше текущей';
-      }
+        if (!delta_day($_POST['lot-date'])) {
+            $errors['lot-date'] = 'Дата завершения должна быть хотя бы на день больше текущей';
+        }
 
-      if (isset($_FILES['photo2']['name'])) {
-        if (!empty($_FILES['photo2']['name'])) {
-            $tmp_name = $_FILES['photo2']['tmp_name'];
-            $path = $_FILES['photo2']['name'];
+        if (isset($_FILES['photo2']['name'])) {
+            if (!empty($_FILES['photo2']['name'])) {
+                $tmp_name = $_FILES['photo2']['tmp_name'];
+                $path = $_FILES['photo2']['name'];
 
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            $file_type = finfo_file($finfo, $tmp_name);
-            if (($file_type !== "image/jpeg")&&($file_type !== "image/png")) {
-                $errors['file'] = 'Загрузите картинку в формате GPEG, либо PNG';
-            }
-            else {
-                if ($file_type == "image/jpeg") $path = uniqid() . ".jpg";
-                if ($file_type == "image/png") $path = uniqid() . ".png";
-                move_uploaded_file($tmp_name, 'img/' . $path);
-                $lot['path'] = $path;
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                $file_type = finfo_file($finfo, $tmp_name);
+                if (($file_type !== "image/jpeg")&&($file_type !== "image/png")) {
+                    $errors['file'] = 'Загрузите картинку в формате GPEG, либо PNG';
+                }
+                else {
+                    if ($file_type == "image/jpeg") {
+                        $path = uniqid() . ".jpg";
+                    }
+                    if ($file_type == "image/png") {
+                        $path = uniqid() . ".png";
+                    }
+                    move_uploaded_file($tmp_name, 'img/' . $path);
+                    $lot['path'] = $path;
+                }
+            } else {
+                $errors['file'] = 'Вы не загрузили файл';
             }
         } else {
             $errors['file'] = 'Вы не загрузили файл';
         }
-      } else {
-        $errors['file'] = 'Вы не загрузили файл';
-      }
 
-      if (count($errors)) {// если есть ошибки заполнения формы
-        $page_content = include_template('add.php', ['lot' => $lot, 'categories' => $categories, 'errors' => $errors, 'dict' => $dict]);
-      }
-      else {//ошибок заполнения формы нет
-        $sql = 'INSERT INTO lots (date_add, name, description, img_url, start_price, date_end, step, user_author_id, category_id) VALUES (NOW(), ?, ?, ?, ?, ?, ?, 1, ?)';
-        $stmt = db_get_prepare_stmt($con, $sql, [$lot['lot-name'], $lot['message'], 'img/' . $lot['path'], $lot['lot-rate'], $lot['lot-date'], $lot['lot-step'], $lot['category']]);
-        $res = mysqli_stmt_execute($stmt);
+        if (count($errors)) {// если есть ошибки заполнения формы
+            $page_content = include_template('add.php', ['lot' => $lot, 'categories' => $categories, 'errors' => $errors, 'dict' => $dict]);
+        } else {
+            //ошибок заполнения формы нет
+            $sql = 'INSERT INTO lots (date_add, name, description, img_url, start_price, date_end, step, user_author_id, category_id) VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?, ?)';
+            $stmt = db_get_prepare_stmt($con, $sql, [$lot['lot-name'], $lot['message'], 'img/' . $lot['path'], $lot['lot-rate'], $lot['lot-date'], $lot['lot-step'], $user_id, $lot['category']]);
+            $res = mysqli_stmt_execute($stmt);
 
-        // получили id созданого лота и перешли на его страницу
-        if ($res) {
-            $lot_id = mysqli_insert_id($con);
-            header("Location: lot.php?id=" . $lot_id);
+            // получили id созданого лота и перешли на его страницу
+            if ($res) {
+                $lot_id = mysqli_insert_id($con);
+                header("Location: lot.php?id=" . $lot_id);
+            } else {
+                $page_content = include_template('error.php', ['error' => mysqli_error($con)]);
+            }
         }
-        else {
-            $page_content = include_template('error.php', ['error' => mysqli_error($con)]);
-        }
-      }
-    }
-    else {// форма не была отправлена, просто отображаем страницу
+    } else {
+        // форма не была отправлена, просто отображаем страницу
         $page_content = include_template('add.php', ['categories' => $categories]);
+        }
     }
-   }
 }
 
 $layout_content = include_template('layout.php', [
-	'content' => $page_content,
-	'categories' => $categories,
-	'name_page' => 'Добавление лота',
+    'content' => $page_content,
+    'categories' => $categories,
+    'name_page' => 'Добавление лота',
     'is_auth' => $is_auth,
     'user_name' => $user_name
 ]);
