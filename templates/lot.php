@@ -19,8 +19,8 @@
           <p class="lot-item__description"><?=$lot['description'] ?></p>
         </div>
         <div class="lot-item__right">
-          <?php $classname = $is_auth ? "" : "visually-hidden";?>
-          <div class="lot-item__state <?=$classname;?>">
+
+          <div class="lot-item__state">
             <div class="lot-item__timer timer">
                 <?=seconds_tomorrow();?>
             </div>
@@ -34,7 +34,8 @@
                 Мин. ставка <span><?=number_format($lot['price']+$lot['step'],0,'',' ') ?> р</span>
               </div>
             </div>
-            <form class="lot-item__form" action="lot.php?id=<?=$lot['id'];?>" method="post">
+            <?php $classname = ($is_auth && (actually($lot['date_end'])) && ($user_id != $lot['user_author_id']) && (!$rate_user)) ? "" : "visually-hidden";?>
+            <form class="lot-item__form <?=$classname;?>" action="lot.php?id=<?=$lot['id'];?>" method="post">
               <?php $classname = isset($errors['cost']) ? "form__item--invalid" : "";
               $value = isset($lot['cost']) ? $lot['cost'] : "";
               $error = isset($errors['cost']) ? $errors['cost'] : "";?>

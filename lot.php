@@ -1,7 +1,5 @@
 <?php
 require_once('functions.php');
-//$is_auth = rand(0, 1);
-//$user_name = 'Ольга'; // укажите здесь ваше имя
 
 $is_auth = 0;
 $user_name = '';
@@ -12,16 +10,15 @@ if (isset($_SESSION['user'])){
     $is_auth = 1;
     $user_name = $u['name'];
     $user_id = $u['id'];
-
 }
 
 $categories = [];
 $name_page='';
-/////
 $rate['cost']= '';
 $errors = '';
 $dict = '';
-
+$rate_current_user = [];
+$rate_user = false;
 $error = '';
 $con = mysqli_connect("localhost", "root", "", "yeticave");
 mysqli_set_charset($con, "utf8");
@@ -48,13 +45,8 @@ if ($var_404 == 0) {
         } else {
             $categories= mysqli_fetch_all($result, MYSQLI_ASSOC);
         }
-    }
 
-    if(!$con) {
-        $error="Ошибка подключения: " . mysqli_connect_error();
-        $page_content = include_template('error.php', ['error' => $error]);
-    } else {
-        $sql= "SELECT l.id id, l.name name, l.description description, c.name category, GREATEST(IFNULL(MAX(r.summ),0),l.start_price) price, l.img_url url, l.step step  FROM lots l
+        $sql= "SELECT l.id id, l.name name, l.description description, l.date_end, l.user_author_id, c.name category, GREATEST(IFNULL(MAX(r.summ),0),l.start_price) price, l.img_url url, l.step step  FROM lots l
         JOIN users u ON u.id=l.user_author_id
         JOIN categories c ON c.id=l.category_id
         LEFT JOIN rates r ON r.lot_id=l.id
@@ -67,7 +59,9 @@ if ($var_404 == 0) {
             $page_content = include_template('error.php', ['error' => $error]);
         } else {
             $lot_data= mysqli_fetch_array($result, MYSQLI_ASSOC);
-            if (count($lot_data) == 0) $var_404 = 1;
+            if (count($lot_data) == 0) {
+                $var_404 = 1;
+            }
         }
     }
 }
@@ -77,7 +71,7 @@ if ($var_404 == 0) {
         $error="Ошибка подключения: " . mysqli_connect_error();
         $page_content = include_template('error.php', ['error' => $error]);
     } else {
-        $sql= "SELECT r.id id, r.summ summ, u.name name, r.date_add date_add  FROM rates r
+        $sql= "SELECT r.id id, r.summ summ, u.name name, r.date_add date_add, r.user_id  FROM rates r
         JOIN users u ON r.user_id=u.id
         WHERE r.lot_id='$id'
         ORDER BY r.date_add DESC
@@ -89,6 +83,23 @@ if ($var_404 == 0) {
             $page_content = include_template('error.php', ['error' => $error]);
         } else {
             $rates_data= mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+            //Проверяю есть ли ставка текущего пользователя
+            $sql= "SELECT r.id id, r.summ summ, u.name name, r.date_add date_add, r.user_id  FROM rates r
+            JOIN users u ON r.user_id=u.id
+            WHERE r.lot_id='$id' AND r.user_id=$user_id";
+            $result = mysqli_query($con, $sql);
+
+            if(!$result) {
+                $error= mysqli_error($con);
+                $page_content = include_template('error.php', ['error' => $error]);
+            } else {
+                $rate_current_user= mysqli_fetch_all($result, MYSQLI_ASSOC);
+                if (count($rate_current_user) > 0) {
+                    //ставка есть
+                    $rate_user = true;
+                }
+            }
         }
     }
 }
@@ -100,10 +111,15 @@ if ($var_404 == 1) {
     ]);
 }
 
-/* Если нет никаких ошибок, то показываем обычную страницу */
+/* Если нет никаких ошибок, то показываем страницу лота либо с формой по добавлению ставки, либо без нее */
 if (($error == '')&&($var_404 == 0)) {
-      // работа с данными формы по добавлению ставок, если она была отправлена и если пользователь залогинен
-      if (($_SERVER['REQUEST_METHOD'] == 'POST')&&($is_auth)){
+    // работа с данными формы по добавлению ставок, если она была отправлена
+    // и если выполнены условия:
+    // пользователь авторизован;
+    // срок размещения лота не истёк;
+    // лот создан не текущим пользователем;
+    // текущий пользователь еще не добавлял ставку для этого лота;
+    if (($_SERVER['REQUEST_METHOD'] == 'POST')&&($is_auth)&&(actually($lot_data['date_end']))&&($user_id != $lot_data['user_author_id'])&&(!$rate_user)) {
         $rate = $_POST;
         $required = ['cost'];
         $dict = ['cost' => 'Сумма ставки'];
@@ -114,38 +130,40 @@ if (($error == '')&&($var_404 == 0)) {
             }
         }
 
-      if (!is_numeric($_POST['cost'])) {
-        $errors['cost'] = 'Сумма ставки должна быть числом';
-      } else if ($_POST['cost'] <= 0) {
-        $errors['cost'] = 'Сумма ставки должна быть больше нуля';
-      } else if ($_POST['cost'] < ($lot_data['price']+$lot_data['step'])) {
-        $errors['cost'] = 'Сумма ставки должна быть больше текущей + шаг торгов';
-      }
-        if (count($errors)) {// если есть ошибки заполнения формы
-          $page_content = include_template('lot.php', [
-              'categories' => $categories,
-              'lot' => $lot_data,
-              'rates' => $rates_data,
-              'cost' => $rate['cost'],
-              'errors' => $errors,
-              'dict' => $dict
-          ]);
+        if (!is_numeric($_POST['cost'])) {
+            $errors['cost'] = 'Сумма ставки должна быть числом';
+        } else if ($_POST['cost'] <= 0) {
+            $errors['cost'] = 'Сумма ставки должна быть больше нуля';
+        } else if ($_POST['cost'] < ($lot_data['price']+$lot_data['step'])) {
+            $errors['cost'] = 'Сумма ставки должна быть больше текущей + шаг торгов';
         }
-        else {//ошибок заполнения формы нет
-          $sql = 'INSERT INTO rates (date_add, summ, user_id, lot_id) VALUES (NOW(), ?, ?, ?)';
-          $stmt = db_get_prepare_stmt($con, $sql, [$rate['cost'], $user_id, $id]);
-          $res = mysqli_stmt_execute($stmt);
+        if (count($errors)) {// если есть ошибки заполнения формы
+            $page_content = include_template('lot.php', [
+                'categories' => $categories,
+                'lot' => $lot_data,
+                'rates' => $rates_data,
+                'cost' => $rate['cost'],
+                'errors' => $errors,
+                'dict' => $dict,
+                'is_auth' => $is_auth,
+                'user_id' => $user_id,
+                'rate_user' => $rate_user
+            ]);
+        } else {
+            //ошибок заполнения формы нет
+            $sql = 'INSERT INTO rates (date_add, summ, user_id, lot_id) VALUES (NOW(), ?, ?, ?)';
+            $stmt = db_get_prepare_stmt($con, $sql, [$rate['cost'], $user_id, $id]);
+            $res = mysqli_stmt_execute($stmt);
 
-          // Добавили ставку и тепрерь нужно обновить страницу
-          if ($res) {
-            header("Location: lot.php?id=" . $id . "update=1");
-          }
-          else {
-            $page_content = include_template('error.php', ['error' => mysqli_error($con)]);
-          }
+            // Добавили ставку и тепрерь нужно обновить страницу
+            if ($res) {
+                header("Location: lot.php?id=" . $id . "update=1");
+            } else {
+                $page_content = include_template('error.php', ['error' => mysqli_error($con)]);
+            }
         }
     } else {
-        //форма не была отправлена, ошибки =0
+        //форма не была отправлена, либо не выполнены перечисленные выше условия
         $page_content = include_template('lot.php', [
             'categories' => $categories,
             'lot' => $lot_data,
@@ -153,24 +171,24 @@ if (($error == '')&&($var_404 == 0)) {
             'cost' => [],
             'errors' => [],
             'dict' => [],
-            'is_auth' => $is_auth
+            'is_auth' => $is_auth,
+            'user_id' => $user_id,
+            'rate_user' => $rate_user
         ]);
     }
 
-
     $name_page=$lot_data['name'];
-
 } else {
     $name_page="Yeticave - Ошибка";
 }
 
 $layout_content = include_template('layout.php', [
-	'content' => $page_content,
-	'categories' => $categories,
-	'name_page' => $name_page,
+    'content' => $page_content,
+    'categories' => $categories,
+    'name_page' => $name_page,
     'is_auth' => $is_auth,
     'user_name' => $user_name
-]);
+    ]);
 
 print($layout_content);
 ?>

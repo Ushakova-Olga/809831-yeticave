@@ -1,7 +1,5 @@
 <?php
 require_once('functions.php');
-//$is_auth = rand(0, 1);
-//$user_name = 'Ольга'; // укажите здесь ваше имя
 // Пагинацию сделала по свуему усмотрению, переделаю после след лекции когда расскажут про это
 $is_auth = 0;
 $user_name = '';
@@ -30,11 +28,11 @@ if (!ISSET($_GET['category'])){
 };
 
 if (!ISSET($_GET['p'])){
-  // В запросе отсутствует p
-  $p=1;
+    // В запросе отсутствует p
+    $p=1;
 } else {
-  $p=intval($_GET['p']);
-  if ($p <= 0 ) $p=1;
+    $p=intval($_GET['p']);
+    if ($p <= 0 ) $p=1;
 };
 
 
@@ -90,9 +88,9 @@ if ($error == '') {
 }
 
 $layout_content = include_template('layout.php', [
-	'content' => $page_content,
-	'categories' => $categories,
-	'name_page' => 'Все лоты',
+    'content' => $page_content,
+    'categories' => $categories,
+    'name_page' => 'Все лоты',
     'is_auth' => $is_auth,
     'user_name' => $user_name
 ]);

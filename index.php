@@ -22,11 +22,11 @@ if(!$con) {
     $error="Ошибка подключения: " . mysqli_connect_error();
     $page_content = include_template('error.php', ['error' => $error]);
 } else {
-    $sql= "SELECT l.id id, l.name name, c.name category, GREATEST(IFNULL(MAX(r.summ),0),l.start_price) price, l.img_url url   FROM lots l
+    $sql= "SELECT l.id id, l.name name, l.date_end, c.name category, GREATEST(IFNULL(MAX(r.summ),0),l.start_price) price, l.img_url url   FROM lots l
     JOIN users u ON u.id=l.user_author_id
     JOIN categories c ON c.id=l.category_id
     LEFT JOIN rates r ON r.lot_id=l.id
-    WHERE l.user_victor_id IS NULL
+    WHERE CURRENT_TIMESTAMP < l.date_end
     GROUP BY l.id
     ORDER BY l.date_add DESC
     LIMIT 9";
