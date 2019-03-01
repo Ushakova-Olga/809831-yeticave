@@ -1,17 +1,16 @@
 <main>
   <nav class="nav">
     <ul class="nav__list container">
-        <?php foreach ($categories as $item):
-          $classname=($category['id']==$item['id']) ? "nav__item--current" : "";?>
-          <li class="nav__item <?=$classname;?>">
-            <a href="all-lots.php?category=<?=convert_text($item['id'])?>"><?=$item['name'];?></a>
-          </li>
-        <?php endforeach; ?>
+      <?php foreach ($categories as $item): ?>
+        <li class="nav__item">
+          <a href="all-lots.php?category=<?=convert_text($item['id'])?>"><?=$item['name'];?></a>
+        </li>
+      <?php endforeach; ?>
     </ul>
   </nav>
   <div class="container">
     <section class="lots">
-      <h2>Все лоты в категории <span>«<?=$category['name'];?>»</span></h2>
+      <h2>Результаты поиска по запросу «<span><?=$search?></span>»</h2>
       <ul class="lots__list">
           <?php foreach ($lots_list as $item): ?>
               <li class="lots__item lot">
@@ -36,14 +35,14 @@
       </ul>
     </section>
     <?php if ($pages_count > 1):
-    $href_prev = ($current_page-1 > 0) ? "all-lots.php?category=".$category['id']."&page=".($current_page-1) : "";
-    $href_next = ($current_page+1 <= count($pages)) ? "all-lots.php?category=".$category['id']."&page=".($current_page+1) : "";
+    $href_prev = ($current_page-1 > 0) ? "search.php?search=".$search."&page=".($current_page-1) : "";
+    $href_next = ($current_page+1 <= count($pages)) ? "search.php?search=".$search."&page=".($current_page+1) : "";
         ?>
     <ul class="pagination-list">
       <li class="pagination-item pagination-item-prev"><a href=<?=$href_prev;?>>Назад</a></li>
       <?php foreach ($pages as $page): ?>
           <li class="pagination__item <?php if ($page == $current_page): ?>pagination__item--active<?php endif; ?>">
-              <a href="all-lots.php?category=<?=$category['id'].'&page='.$page;?>"><?=$page;?></a>
+              <a href="search.php?search=<?=$search;?>&page=<?=$page;?>"><?=$page;?></a>
           </li>
       <?php endforeach; ?>
       <li class="pagination-item pagination-item-next"><a href=<?=$href_next;?>>Вперед</a></li>

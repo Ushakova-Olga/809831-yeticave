@@ -9,12 +9,12 @@
     </ul>
   </nav>
   <?php $classname = isset($errors) ? "form--invalid" : "";?>
-  <form class="form container <?=$classname;?>" action="sign-in.php" method="post" enctype="multipart/form-data"> <!-- form--invalid -->
+  <form class="form container <?=$classname;?>" action="sign-in.php" method="post" enctype="multipart/form-data">
     <h2>Регистрация нового аккаунта</h2>
     <?php $classname = isset($errors['email']) ? "form__item--invalid" : "";
     $value = isset($user['email']) ? $user['email'] : "";
     $error = isset($errors['email']) ? $errors['email'] : "";?>
-    <div class="form__item <?=$classname;?>"> <!-- form__item--invalid -->
+    <div class="form__item <?=$classname;?>">
       <label for="email">E-mail*</label>
       <input id="email" type="text" name="email" placeholder="Введите e-mail" value="<?=$value;?>">
       <span class="form__error"><?=$error ?></span>

@@ -54,3 +54,5 @@ CREATE UNIQUE INDEX user_email ON users(email);
 CREATE UNIQUE INDEX user_name ON users(name);
 CREATE INDEX lot_name ON lots(name);
 CREATE INDEX lot_start_price ON lots(start_price);
+
+CREATE FULLTEXT INDEX lot_ft_search ON lots(name, description);
