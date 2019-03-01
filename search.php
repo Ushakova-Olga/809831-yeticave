@@ -1,5 +1,7 @@
 <?php
 require_once('functions.php');
+require_once('init.php');
+
 $is_auth = 0;
 $user_name = '';
 
@@ -18,9 +20,7 @@ $error = '';
 $search = '';
 $pages_count = 0;
 $pages = 0;
-
-$link = mysqli_connect("localhost", "root", "", "yeticave");
-mysqli_set_charset($link, "utf8");
+$link = init();
 
 if (ISSET($_GET['page'])){
     $current_page = intval($_GET['page']);
@@ -51,7 +51,6 @@ if ((($_SERVER['REQUEST_METHOD'] == 'POST')||($search !== ''))&&($error === ''))
     }
 
     if ($search !== '') {
-        //mysqli_query($link, 'CREATE FULLTEXT INDEX lot_ft_search ON lots(name, description)');
         $lots_list = [];
 
         $page_items = 9;

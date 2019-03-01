@@ -1,5 +1,6 @@
 <?php
 require_once('functions.php');
+require_once('init.php');
 
 $is_auth = 0;
 $user_name = '';
@@ -16,8 +17,8 @@ if (isset($_SESSION['user'])){
 $categories = [];
 $name_page='';
 $error = '';
-$link = mysqli_connect("localhost", "root", "", "yeticave");
-mysqli_set_charset($link, "utf8");
+
+$link = init();
 
 if(!$link) {
     $error="Ошибка подключения: " . mysqli_connect_error();

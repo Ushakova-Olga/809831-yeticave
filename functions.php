@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
 function include_template($name, $data) {
     $name = 'templates/' . $name;
     $result = '';
@@ -80,6 +83,15 @@ function delta_day($str) {
         return true;
     }
     return false;
+}
+
+function date_limit($str) {
+    $year = intval(substr($str, 0, 4));
+
+    if ($year > 2038) {
+        return false;
+    }
+    return true;
 }
 
 function rate_time($str) {

@@ -1,6 +1,7 @@
 <?php
 // Добавление нового лота
 require_once('functions.php');
+require_once('init.php');
 
 $is_auth = 0;
 $user_name = '';
@@ -15,13 +16,11 @@ if (isset($_SESSION['user'])){
 
 $categories = [];
 $error = '';
-$link = mysqli_connect("localhost", "root", "", "yeticave");
-mysqli_set_charset($link, "utf8");
+$link = init();
 
 // получаем категории для отрисовки на странице
 if(!$link) {
     $error="Ошибка подключения: " . mysqli_connect_error();
-    //$page_content = include_template('error.php', ['error' => $error]);
 } else {
     $sql= "SELECT c.id, c.name FROM categories c";
     $result = mysqli_query($link, $sql);
@@ -78,16 +77,20 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST')&&($error === '')) {
         }
     }
 
-    $email = mysqli_real_escape_string($link, $user['email']);
-    $sql = "SELECT id FROM users WHERE email = '$email'";
-    $res = mysqli_query($link, $sql);
+    if (isset($user['email'])) {
+        $email = mysqli_real_escape_string($link, $user['email']);
+        $sql = "SELECT id FROM users WHERE email = '$email'";
+        $res = mysqli_query($link, $sql);
 
-    if (mysqli_num_rows($res) > 0) {
-        $errors['email'] = 'Пользователь с этим email уже зарегистрирован';
-    }
+        if (mysqli_num_rows($res) > 0) {
+            $errors['email'] = 'Пользователь с этим email уже зарегистрирован';
+        }
 
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL) ) {
-        $errors['email'] = 'Введен некорректный e-mail';
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL) ) {
+            $errors['email'] = 'Введен некорректный e-mail';
+         }
+     } else {
+         $errors['email'] = 'email не заполнен';
      }
 
     if (count($errors)) {// если есть ошибки заполнения формы

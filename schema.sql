@@ -21,7 +21,7 @@ CREATE TABLE lots (
   description TEXT,
   img_url CHAR(255),
   start_price INT NOT NULL,
-  date_end TIMESTAMP,
+  date_end TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   step INT NOT NULL,
   user_author_id INT NOT NULL,
   user_victor_id INT,

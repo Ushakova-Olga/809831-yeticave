@@ -1,6 +1,7 @@
 <?php
 // Добавление нового лота
 require_once('functions.php');
+require_once('init.php');
 
 $is_auth = 0;
 $user_name = '';
@@ -17,8 +18,7 @@ $categories = [];
 $lots_list = [];
 
 $error = '';
-$link = mysqli_connect("localhost", "root", "", "yeticave");
-mysqli_set_charset($link, "utf8");
+$link = init();
 
 // получаем категории для отрисовки на странице
 if($link) {
@@ -65,6 +65,10 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST')&&($is_auth)&&($link)) {
 
     if (!delta_day($_POST['lot-date'])) {
         $errors['lot-date'] = 'Дата завершения должна быть хотя бы на день больше текущей';
+    }
+
+    if (!date_limit($_POST['lot-date'])){
+        $errors['lot-date'] = 'Дата завершения должна быть меньше 2038 года';
     }
 
     $file_exist = 0;

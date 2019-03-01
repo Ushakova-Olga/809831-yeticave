@@ -1,9 +1,11 @@
 <?php
 // Модуль для определения победителя.
+require_once('init.php');
+
 function victory() {
     $error = '';
-    $link = mysqli_connect("localhost", "root", "", "yeticave");
-    mysqli_set_charset($link, "utf8");
+    $link = init();
+
     $now = strtotime('now');
     $letter = '';
     if(!$link) {

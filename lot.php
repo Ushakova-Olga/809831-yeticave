@@ -1,5 +1,6 @@
 <?php
 require_once('functions.php');
+require_once('init.php');
 
 $is_auth = 0;
 $user_name = '';
@@ -20,8 +21,9 @@ $rate_current_user = [];
 $lot_data = [];
 $rate_user = false;
 $error = '';
-$link = mysqli_connect("localhost", "root", "", "yeticave");
-mysqli_set_charset($link, "utf8");
+
+$link = init();
+
 $var_404 = 0;
 
 if (!ISSET($_GET['id'])){
@@ -58,7 +60,7 @@ if (($var_404 === 0)&&($error === '')) {
     }
 }
 
-if (count($lot_data) === 0) {
+if (!$lot_data) {
     $var_404 = 1;
     http_response_code(404);
     $page_content = include_template('404.php', [
@@ -124,13 +126,19 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST')&&($conditions)) {
         }
     }
 
-    if (!is_numeric($_POST['cost'])) {
-        $errors['cost'] = 'Сумма ставки должна быть числом';
-    } else if ($_POST['cost'] <= 0) {
-        $errors['cost'] = 'Сумма ставки должна быть больше нуля';
-    } else if ($_POST['cost'] < ($lot_data['price']+$lot_data['step'])) {
-        $errors['cost'] = 'Сумма ставки должна быть больше текущей + шаг торгов';
+    if(isset($_POST['cost'])){
+        if (!is_numeric($_POST['cost'])) {
+            $errors['cost'] = 'Сумма ставки должна быть числом';
+        } else if ($_POST['cost'] <= 0) {
+            $errors['cost'] = 'Сумма ставки должна быть больше нуля';
+        } else if ($_POST['cost'] < ($lot_data['price']+$lot_data['step'])) {
+            $errors['cost'] = 'Сумма ставки должна быть больше текущей + шаг торгов';
+        }
+    } else {
+        $errors['cost'] = 'Введите сумму ставки';
+        $rate['cost'] = '';
     }
+
     if (count($errors)) {// если есть ошибки заполнения формы
         $page_content = include_template('lot.php', [
             'categories' => $categories,
