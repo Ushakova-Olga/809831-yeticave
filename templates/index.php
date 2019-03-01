@@ -25,11 +25,11 @@
                         <h3 class="lot__title"><a class="text-link" href="lot.php?id=<?=convert_text($item['id']); ?>"><?=convert_text($item['name']);?></a></h3>
                         <div class="lot__state">
                             <div class="lot__rate">
-                                <span class="lot__amount">Стартовая цена</span>
+                                <span class="lot__amount"><?=rates_string($item['amount']);?></span>
                                 <span class="lot__cost"><?=format_rub(convert_text($item['price']));?></span>
                             </div>
                             <div class="lot__timer timer">
-                                <?=seconds_tomorrow();?>
+                                <?=seconds_free($item['date_end']);?>
                             </div>
                         </div>
                     </div>

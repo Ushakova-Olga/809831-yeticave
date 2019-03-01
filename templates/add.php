@@ -8,7 +8,7 @@
       <?php endforeach; ?>
     </ul>
   </nav>
-  <!-- Поля required в полях формы временно убрала, чтобы легче было проверять  правильность работы программы-->
+  <!-- Атрибуты required в полях формы убраны, чтобы легче было проверять  правильность работы программы-->
   <?php $classname = isset($errors) ? "form--invalid" : "";?>
   <form class="form form--add-lot container <?=$classname;?>" action="add.php" method="post" enctype="multipart/form-data"> <!-- form--invalid -->
     <h2>Добавление лота</h2>
