@@ -24,7 +24,7 @@ CREATE TABLE lots (
   date_end TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   step INT NOT NULL,
   user_author_id INT NOT NULL,
-  user_victor_id INT,
+  user_winner_id INT,
   category_id INT NOT NULL
 );
 

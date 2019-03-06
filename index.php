@@ -1,6 +1,5 @@
 <?php
 require_once('functions.php');
-require_once('victory.php');
 require_once('init.php');
 
 $is_auth = 0;
@@ -66,8 +65,7 @@ $layout_content = include_template('layout.php', [
     'user_name' => $user_name
 ]);
 
-//вызов ф-ии определения победителей
-victory();
+//подключение модуля определения победителей
+require_once('getwinner.php');
 print($layout_content);
-
 ?>

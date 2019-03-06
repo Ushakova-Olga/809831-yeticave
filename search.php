@@ -44,7 +44,7 @@ if(!$link) {
     }
 }
 
-if ((($_SERVER['REQUEST_METHOD'] == 'POST')||($search !== ''))&&($error === '')) {
+if ((($_SERVER['REQUEST_METHOD'] === 'POST')||($search !== ''))&&($error === '')) {
     //форма отправлена
     if ($search === '') {
         $search = trim(htmlspecialchars($_POST['search']));
@@ -103,6 +103,8 @@ if ((($_SERVER['REQUEST_METHOD'] == 'POST')||($search !== ''))&&($error === ''))
             'current_page' => $current_page]);
         $name_page="Результаты поиска по запросу: " . $search;
     }
+} else {
+    $error="Неверные параметры запроса";
 }
 
 if ($error) {

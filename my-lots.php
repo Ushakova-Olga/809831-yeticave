@@ -31,7 +31,7 @@ if(!$link) {
         $categories= mysqli_fetch_all($result, MYSQLI_ASSOC);
     }
 
-    $sql= "SELECT MAX(r.id) id, MAX(r.summ) summ, u.contacts contacts, u.name author_name, MAX(r.date_add) date_add, c.name category, l.user_victor_id victor, l.name lot_name, l.img_url url, l.id lot_id, l.date_end date_end   FROM rates r
+    $sql= "SELECT MAX(r.id) id, MAX(r.summ) summ, u.contacts contacts, u.name author_name, MAX(r.date_add) date_add, c.name category, l.user_winner_id winner, l.name lot_name, l.img_url url, l.id lot_id, l.date_end date_end   FROM rates r
     JOIN lots l ON r.lot_id=l.id
     JOIN categories c ON l.category_id=c.id
     JOIN users u ON l.user_author_id = u.id

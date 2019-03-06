@@ -33,7 +33,7 @@ if(!$link) {
 }
 
 // работа с данными формы если она была отправлена
-if (($_SERVER['REQUEST_METHOD'] == 'POST')&&($error === '')) {
+if (($_SERVER['REQUEST_METHOD'] === 'POST')&&($error === '')) {
     $user = $_POST;
     $required = ['email', 'password', 'name', 'message'];
     $dict = ['email' => 'E-mail', 'password' => 'Пароль', 'name' => 'Имя',

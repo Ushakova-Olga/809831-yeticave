@@ -69,7 +69,7 @@ if ($var_404 === 1) {
     ]);
 }
 
-if (($error === '')&&($var_404 == 0)) {
+if (($error === '')&&($var_404 === 0)) {
     $page_items = 9;
 
     $sql= "SELECT COUNT(*) as cnt FROM lots l

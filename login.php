@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') { //форма была отправл
             $errors['password'] = 'Вы ввели неверный пароль';
         }
     }
-    else {
+    else if (!count($errors)) {
         $errors['email'] = 'Вы ввели неверный email';
     }
 
