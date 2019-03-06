@@ -1,6 +1,7 @@
 <?php
 // Добавление нового лота
 require_once('functions.php');
+require_once('init.php');
 
 $is_auth = 0;
 $user_name = '';
@@ -17,8 +18,7 @@ $categories = [];
 $lots_list = [];
 
 $error = '';
-$link = mysqli_connect("localhost", "root", "", "yeticave");
-mysqli_set_charset($link, "utf8");
+$link = init();
 
 // получаем категории для отрисовки на странице
 if($link) {
@@ -39,7 +39,7 @@ if ($is_auth === 0) {
     ]);
 }
     // работа с данными формы если она была отправлена
-if (($_SERVER['REQUEST_METHOD'] == 'POST')&&($is_auth)&&($link)) {
+if (($_SERVER['REQUEST_METHOD'] === 'POST')&&($is_auth)&&($link)) {
     $lot = $_POST;
     $required = ['lot-name', 'category', 'message', 'lot-rate', 'lot-step', 'lot-date'];
     $dict = ['lot-name' => 'Наименование лота', 'category' => 'Категория', 'message' => 'Описание',
@@ -51,20 +51,29 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST')&&($is_auth)&&($link)) {
         }
     }
 
-    if ((!is_numeric($_POST['category']))||($_POST['category'] <= 0)) {
-        $errors['category'] = 'Выберите категорию';
+    if(isset($_POST['category'])){
+        if ((!is_numeric($_POST['category']))||($_POST['category'] <= 0)) {
+            $errors['category'] = 'Выберите категорию';
+        }
     }
 
-    if ((!is_numeric($_POST['lot-rate']))||($_POST['lot-rate'] <= 0)) {
-        $errors['lot-rate'] = 'Введите число больше нуля';
+    if(isset($_POST['lot-rate'])){
+        if ((!is_numeric($_POST['lot-rate']))||($_POST['lot-rate'] <= 0)) {
+            $errors['lot-rate'] = 'Введите число больше нуля';
+        }
     }
-
-    if ((!is_numeric($_POST['lot-step']))||($_POST['lot-step'] <= 0)) {
-        $errors['lot-step'] = 'Введите число больше нуля';
+    if(isset($_POST['lot-step'])){
+        if ((!is_numeric($_POST['lot-step']))||($_POST['lot-step'] <= 0)) {
+            $errors['lot-step'] = 'Введите число больше нуля';
+        }
     }
-
-    if (!delta_day($_POST['lot-date'])) {
-        $errors['lot-date'] = 'Дата завершения должна быть хотя бы на день больше текущей';
+    if(isset($_POST['lot-date'])){
+        if (!delta_day($_POST['lot-date'])) {
+            $errors['lot-date'] = 'Дата завершения должна быть хотя бы на день больше текущей';
+        }
+        if (!date_limit($_POST['lot-date'])){
+            $errors['lot-date'] = 'Дата завершения должна быть меньше 2038 года';
+        }
     }
 
     $file_exist = 0;

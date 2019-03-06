@@ -1,5 +1,6 @@
 <?php
 require_once('functions.php');
+require_once('init.php');
 
 $is_auth = 0;
 $user_name = '';
@@ -17,10 +18,8 @@ $category = [];
 $current_page = 1;
 $var_404 = 0;
 $cat = 0;
-
 $error = '';
-$link = mysqli_connect("localhost", "root", "", "yeticave");
-mysqli_set_charset($link, "utf8");
+$link = init();
 
 if (!ISSET($_GET['category'])){
     // В запросе отсутствует category
@@ -56,7 +55,7 @@ if(!$link) {
         $page_content = include_template('error.php', ['error' => $error]);
     } else {
         $category= mysqli_fetch_array($result, MYSQLI_ASSOC);
-        if (count($category) == 0) {
+        if (!$category) {
             //category указанная в запросе отсутствует в базе данных
             $var_404 = 1;
         }
@@ -70,7 +69,7 @@ if ($var_404 === 1) {
     ]);
 }
 
-if (($error === '')&&($var_404 == 0)) {
+if (($error === '')&&($var_404 === 0)) {
     $page_items = 9;
 
     $sql= "SELECT COUNT(*) as cnt FROM lots l

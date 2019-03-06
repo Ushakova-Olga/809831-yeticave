@@ -19,7 +19,7 @@
               $classname_item = "";
               $value = seconds_free($item['date_end']);
               $classname_timer = "timer--finishing";
-          } else if (($user_id === $item['victor'])) {
+          } else if (($user_id === $item['winner'])) {
               $classname_item = "rates__item--win";
               $value = "Ставка победила";
               $classname_timer = "timer--win";
