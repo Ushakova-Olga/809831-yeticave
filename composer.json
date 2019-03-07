@@ -1,0 +1,15 @@
+{
+    "name": "olga/yeticave",
+    "description": "Auction",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ushakova-Olga",
+            "email": "Ushakova-Olga@yandex.ru"
+        }
+    ],
+    "require": {
+        "swiftmailer/swiftmailer": "^5.4"
+    }
+}

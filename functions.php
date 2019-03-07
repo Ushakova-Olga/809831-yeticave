@@ -174,13 +174,6 @@ function rate_time($str) {
     return $result;
 }
 
-/**
-* Функция для создания подготовленных выражений
-* @param
-* @param string
-* @param array
-* @return
-*/
 function db_get_prepare_stmt($link, $sql, $data = []) {
     $stmt = mysqli_prepare($link, $sql);
 
