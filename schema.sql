@@ -10,16 +10,16 @@ USE yeticave;
 /* Категории */
 CREATE TABLE categories (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  name CHAR(255) NOT NULL UNIQUE
+  name VARCHAR(255) NOT NULL UNIQUE
 );
 
 /* Лоты */
 CREATE TABLE lots (
   id INT AUTO_INCREMENT PRIMARY KEY,
   date_add TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  name char(255)  NOT NULL,
+  name VARCHAR(255)  NOT NULL,
   description TEXT,
-  img_url CHAR(255),
+  img_url VARCHAR(255),
   start_price INT NOT NULL,
   date_end TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   step INT NOT NULL,
@@ -41,11 +41,11 @@ CREATE TABLE rates (
 CREATE TABLE users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   date_add TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  email CHAR(255) NOT NULL UNIQUE,
-  name CHAR(255) NOT NULL,
-  password CHAR(64) NOT NULL,
-  img_url CHAR(255),
-  contacts CHAR(255)
+  email VARCHAR(255) NOT NULL UNIQUE,
+  name VARCHAR(255) NOT NULL,
+  password VARCHAR(64) NOT NULL,
+  img_url VARCHAR(255),
+  contacts VARCHAR(255)
 );
 
 /* Созданы индексы для поиска - уникальные и обычные*/

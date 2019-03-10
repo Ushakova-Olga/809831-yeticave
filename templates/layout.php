@@ -25,7 +25,7 @@
         <nav class="user-menu">
           <?php  if ($is_auth === 1 ):  ?>
           <div class="user-menu__logged">
-            <p><?=$user_name; ?></p>
+            <p><?=convert_text($user_name); ?></p>
             <a href="logout.php">Выйти</a>
           </div>
           <?php  else: ?>
@@ -50,7 +50,7 @@
         <ul class="nav__list container">
             <?php foreach ($categories as $item): ?>
               <li class="nav__item">
-                <a href="all-lots.php?category=<?=convert_text($item['id'])?>"><?=$item['name'];?></a>
+                <a href="all-lots.php?category=<?=$item['id']?>"><?=$item['name'];?></a>
               </li>
             <?php endforeach; ?>
         </ul>

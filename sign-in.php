@@ -17,6 +17,9 @@ if (isset($_SESSION['user'])){
 $categories = [];
 $error = '';
 $link = init();
+$file_exist = 0;
+$tmp_name = '';
+
 
 // получаем категории для отрисовки на странице
 if(!$link) {
@@ -45,7 +48,6 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST')&&($error === '')) {
         }
     }
 
-    $file_exist = 0;
     if (isset($_FILES['photo2']['name'])) {
         if (!empty($_FILES['photo2']['name'])) {
             $file_exist = 1;
@@ -55,9 +57,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST')&&($error === '')) {
     if ($file_exist) {
         $tmp_name = $_FILES['photo2']['tmp_name'];
         $path = $_FILES['photo2']['name'];
-
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $file_type = finfo_file($finfo, $tmp_name);
+        $file_type = mime_content_type($tmp_name);
 
         switch ($file_type) {
             case "image/jpeg":
@@ -71,10 +71,25 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST')&&($error === '')) {
         }
         if (($file_type !== "image/jpeg")&&($file_type !== "image/png")) {
             $errors['file'] = 'Загрузите картинку в формате GPEG, либо PNG';
-        } else {
-            move_uploaded_file($tmp_name, 'img/' . $path);
-            $lot['path'] = $path;
         }
+    }
+
+    if (isset($user['name'])) {
+         if (strlen($user['name']) > 255) {
+             $errors['name'] = 'Имя пользователя не должно быть более 255 символов';
+         }
+    }
+
+    if (isset($user['password'])) {
+         if (strlen($user['password']) > 255) {
+             $errors['password'] = 'Пароль пользователя не должен быть более 255 символов';
+         }
+    }
+
+    if (isset($user['message'])) {
+         if (strlen($user['message']) > 255) {
+             $errors['message'] = 'Контактные данные не должны быть более 255 символов';
+         }
     }
 
     if (isset($user['email'])) {
@@ -89,6 +104,10 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST')&&($error === '')) {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL) ) {
             $errors['email'] = 'Введен некорректный e-mail';
          }
+
+         if (strlen($email) > 255) {
+             $errors['email'] = 'Введенный слишком длинный e-mail';
+         }
      } else {
          $errors['email'] = 'email не заполнен';
      }
@@ -96,7 +115,12 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST')&&($error === '')) {
     if (count($errors)) {// если есть ошибки заполнения формы
         $page_content = include_template('sign-in.php', ['categories' => $categories, 'user' => $user, 'errors' => $errors, 'dict' => $dict]);
     }
-    else {//ошибок заполнения формы нет, добавляем пользователя
+    else {//ошибок заполнения формы нет
+        if ($file_exist) {
+            // перемещаем изображение в папку 'img/'
+            move_uploaded_file($tmp_name, 'img/' . $path);
+        }
+        // добавляем пользователя
         $password = password_hash($user['password'], PASSWORD_DEFAULT);
         //Создание нового пользователя
         $sql = 'INSERT INTO users (date_add, email, name, password, img_url, contacts) VALUES (NOW(), ?, ?, ?, ?, ?)';

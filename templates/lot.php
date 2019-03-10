@@ -3,20 +3,20 @@
       <ul class="nav__list container">
         <?php foreach ($categories as $item): ?>
           <li class="nav__item">
-            <a href="all-lots.php?category=<?=convert_text($item['id'])?>"><?=$item['name'];?></a>
+            <a href="all-lots.php?category=<?=$item['id']?>"><?=$item['name'];?></a>
           </li>
         <?php endforeach; ?>
       </ul>
     </nav>
     <section class="lot-item container">
-      <h2><?=$lot['name']?></h2>
+      <h2><?=convert_text($lot['name'])?></h2>
       <div class="lot-item__content">
         <div class="lot-item__left">
           <div class="lot-item__image">
-            <img src="<?=convert_text($lot['url']); ?>" width="730" height="548" alt="<?=$lot['name']?>">
+            <img src="<?=$lot['url']; ?>" width="730" height="548" alt="<?=convert_text($lot['name'])?>">
           </div>
           <p class="lot-item__category">Категория: <span><?=$lot['category'] ?></span></p>
-          <p class="lot-item__description"><?=$lot['description'] ?></p>
+          <p class="lot-item__description"><?=convert_text($lot['description']) ?></p>
         </div>
         <div class="lot-item__right">
             <?php $value = '';
