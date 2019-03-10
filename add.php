@@ -16,7 +16,8 @@ if (isset($_SESSION['user'])){
 
 $categories = [];
 $lots_list = [];
-
+$id_category = 0;
+$category = [];
 $error = '';
 $link = init();
 
@@ -45,6 +46,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST')&&($is_auth)&&($link)) {
     $dict = ['lot-name' => 'Наименование лота', 'category' => 'Категория', 'message' => 'Описание',
         'lot-rate'=>'Начальная цена' , 'lot-step'=>'Шаг ставки' , 'lot-date'=>'Дата окончания торгов', 'file'=>'Изображение лота'];
     $errors = [];
+
     foreach ($required as $key) {
         if (empty($_POST[$key])) {
             $errors[$key] = 'Это поле надо заполнить';
@@ -54,6 +56,22 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST')&&($is_auth)&&($link)) {
     if(isset($_POST['category'])){
         if ((!is_numeric($_POST['category']))||($_POST['category'] <= 0)) {
             $errors['category'] = 'Выберите категорию';
+        }
+        $id_category = intval($_POST['category']);
+    }
+
+    // проверка есть ли категория в базе
+    if(!isset($errors['category'])){
+        $sql= "SELECT * FROM categories c WHERE c.id='$id_category'";
+        $result = mysqli_query($link, $sql);
+
+        if(!$result) {
+            $error= mysqli_error($link);
+        } else {
+            $category= mysqli_fetch_all($result, MYSQLI_ASSOC);
+        }
+        if (!$category){
+            $errors['category'] = 'Данной категории не существует';
         }
     }
 
@@ -76,6 +94,12 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST')&&($is_auth)&&($link)) {
         }
     }
 
+    if(isset($_POST['name'])){
+        if (strlen($_POST['name']) > 255) {
+            $errors['name'] = 'Название лота должно быть короче 255 символов';
+        }
+    }
+
     $file_exist = 0;
     if (isset($_FILES['photo2']['name'])) {
         if (!empty($_FILES['photo2']['name'])) {
@@ -86,9 +110,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST')&&($is_auth)&&($link)) {
     if ($file_exist) {
         $tmp_name = $_FILES['photo2']['tmp_name'];
         $path = $_FILES['photo2']['name'];
-
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $file_type = finfo_file($finfo, $tmp_name);
+        $file_type = mime_content_type($tmp_name);
 
         switch ($file_type) {
             case "image/jpeg":
@@ -102,9 +124,6 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST')&&($is_auth)&&($link)) {
         }
         if (($file_type !== "image/jpeg")&&($file_type !== "image/png")) {
             $errors['file'] = 'Загрузите картинку в формате GPEG, либо PNG';
-        } else {
-            move_uploaded_file($tmp_name, 'img/' . $path);
-            $lot['path'] = $path;
         }
     } else {
         $errors['file'] = 'Вы не загрузили файл';
@@ -114,6 +133,10 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST')&&($is_auth)&&($link)) {
         $page_content = include_template('add.php', ['lot' => $lot, 'categories' => $categories, 'errors' => $errors, 'dict' => $dict]);
     } else if ($link){
         //ошибок заполнения формы нет
+        // сохраняем картинку в папку 'img/', длину не проверяю т.к. заранее известна длина кот возвращает uniqid() и заведомо < 255
+        move_uploaded_file($tmp_name, 'img/' . $path);
+        $lot['path'] = $path;
+
         $sql = 'INSERT INTO lots (date_add, name, description, img_url, start_price, date_end, step, user_author_id, category_id) VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?, ?)';
         $stmt = db_get_prepare_stmt($link, $sql, [$lot['lot-name'], $lot['message'], 'img/' . $lot['path'], $lot['lot-rate'], $lot['lot-date'], $lot['lot-step'], $user_id, $lot['category']]);
         $res = mysqli_stmt_execute($stmt);
